@@ -1,0 +1,1 @@
+Single Resource REST API w/ Authentication README goes here.
