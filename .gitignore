@@ -1,0 +1,24 @@
+.DS_Store
+.AppleDouble
+.LSOverride
+.glue
+
+# Node modules folder
+node_modules/*
+
+# MongoDB data folder
+data/*
+
+# Foreman enviroment files
+.env
+
+# Thumbnails
+._*
+
+# Optional volume root files
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
