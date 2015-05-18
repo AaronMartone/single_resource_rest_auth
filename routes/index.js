@@ -3,21 +3,22 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 
-// route handler business logic is externalized and brought in.
-var bus = require('./bus');
+// route handles business logic is externalized and brought in.
+var userHandler = require('./user');
 var auth = require('./auth');
 
 // these routes can be accessed by anyone.
-router.post('/login', auth.login);
+router.get('/sign-in', auth.signIn);
 
 // these routes require the user to be authenticated.
-router.get('/api/v1/bus', bus.list);
-router.get('/api/v1/bus/:id', bus.view);
-router.post('/api/v1/bus', bus.create);
-router.put('/api/v1/bus/:id', bus.update);
-router.delete('/api/v1/bus/:id', bus.delete);
+router.route('/api/v1/user')
+    .get(userHandler.list)
+    .post(userHandler.create);
 
-// these require an authenticated and authorized user.
+router.route('/api/v1/user/:id')
+    .get(userHandler.view)
+    .put(userHandler.update)
+    .delete(userHandler.delete);
 
-
+// export router.
 module.exports = router;
