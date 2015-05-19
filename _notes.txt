@@ -1,0 +1,4 @@
+
+// c7IO3mZPR4ej+q1PhGuUivPOpu+vGKk/pj2M/NdOaB/mUZNqipihIhxkljlfTPmTHA==
+// eat.salt = new Buffer('$2a$08$eWMHFgvl6x2CHeQnILoQg.', 'utf8');
+// eat.iv = new Buffer('D0FFF39BE227104B', 'utf8');

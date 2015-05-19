@@ -23,7 +23,10 @@ var server = {
             User.findOne({ 'username': username }, function(err, user) {
                 if (err) { 
                     console.log('Error or No such user found...'); // !!!
-                    return callback(null, null);
+                    res.status(401)
+                        .set('Content-Type', 'application/json')
+                        .json({ result: 'failure', msg: 'Authentication failed.' });
+                    // return callback(null, null);
                 }
                 console.log('User found, returning for password verification...'); // !!!
                 return callback(null, user);
@@ -44,22 +47,32 @@ var server = {
         // get the username/password from the basic http request and authenticate it against the database. =============
         passport.use(new BasicStrategy(
             function(username, password, done) {
-                console.log('Processing Basic HTTP Authenticatin Credentials...'); // !!!
+                console.log('Validating Basic HTTP Authentication Credentials...'); // !!!
+
+                // ensure the user account exists in the database.
                 getUserFromDB(username, function(err, user) {
+                    // general error.
                     if (err) {
-                        console.log('Error occurred in "getUserFromDB"...');
-                        return done(err);
+                        console.log('Authentication Failed: Error Occurred in Getting User from Database.');                        
+                        return done(err, null);
                     }
+                    // user not found in database.
                     if (!user) {
-                        console.log('No need to process password, user not found...'); // !!!
-                        return done(null, false);
+                        console.log('Authentication Failed: No Matching User In Database');                        
+                        return done(new Error('Authentication Failed.'), null);                  
                     }
+                    // validate the password provided.
                     crypt.compare(password, user.password, function(err, result) {
+                        // general error.
                         if (err) { 
-                            console.log('Password provided does not match...');
-                            return done(null, false);
+                            console.log('Authentication Failed: Password Not Valid.');                            
+                            return done(new Error('Authentication Failed.'), null);              
                         }
-                        console.log('Password matches, returning user object...');
+                        if (!result) {
+                            console.log('Authentication Failed: Invalid Credentials.');                            
+                            return done(new Error('Authentication Failed'), null);
+                        }                 
+                        console.log('Authentication Successful.');
                         return done(null, user);
                     });
                 });
@@ -76,6 +89,14 @@ var server = {
         );
 
         app.use('/', [
+            function(req, res, next) { 
+                console.log(req.method + ' ' + req.url + '...');               
+                if (!req.headers['authorization']) {
+                    console.log('Authentication Failed: No Authorization Headers Sent.');
+                    next(new Error('Authentication Failed.'));
+                }
+                next();
+            },        
             passport.authenticate('basic', { session: false}),            
             require('./middleware/validate-req'), 
             require('./routes')
@@ -91,10 +112,10 @@ var server = {
 
         // error 500 handler.
         app.use(function(err, req, res, next) {
-            console.log('\n=== ERROR 500:', err.message, '\n[START STACK]\n', err.stack, '\n[END STACK]'); // !!!
+            console.log('\n=== ERROR 500:', err.message, '\n[START ERROR STACK]\n', err.stack, '\n[END ERROR STACK]'); // !!!
             res.status(500)
                 .set('Content-Type', 'application/json')
-                .json({ error: err.message });
+                .json({ success: false, message: err.message });
         })
 
         // listen on designated port. ==================================================================================
